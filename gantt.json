@@ -197,7 +197,23 @@
         },
         {
             "name": "ganttWidth",
-            "update": "width-columnsWidth-minDayBandwidth"
+            "update": "width-columnsWidth-minDayBandwidth-(scaledHeight>height?scrollBarWidth:0)"
+        },
+        {
+            "name": "scrollBarWidth",
+            "value": 14
+        },
+        {
+            "name": "scrollThumbHeight",
+            "update": "max(20, (height / scaledHeight) * height)"
+        },
+        {
+            "name": "scrollTotalTrack",
+            "update": "height - scrollThumbHeight"
+        },
+        {
+            "name": "scrollRatio",
+            "update": "(scaledHeight - height) / scrollTotalTrack"
         },
         {
             "name": "dayExt",
@@ -229,14 +245,7 @@
         },
         {
             "name": "zoom",
-            "value": 1,
-            "on": [
-                {
-                    "events": "wheel!",
-                    "force": true,
-                    "update": "x()>columnsWidth?pow(1.001, (event.deltaY) * pow(16, event.deltaMode)):1"
-                }
-            ]
+            "value": 1
         },
         {
             "name": "xDomMinSpan",
@@ -305,6 +314,19 @@
                         }
                     ],
                     "update": "clampRange( [yCur[0] + span(yCur) * delta[1] / scaledHeight, yCur[1] + span(yCur) * delta[1] / scaledHeight],height>=scaledHeight?0: height-scaledHeight,height>=scaledHeight?height:scaledHeight)"
+                },
+                {
+                    "events": [
+                        {
+                            "signal": "scrollDelta"
+                        }
+                    ],
+                    "update": "clampRange( [yRangeScrollStart[0] - scrollDelta * scrollRatio, yRangeScrollStart[1] - scrollDelta * scrollRatio], height>=scaledHeight?0: height-scaledHeight, height>=scaledHeight?height:scaledHeight)"
+                },
+                {
+                    "events": "wheel",
+                    "force": true,
+                    "update": "clampRange( [yRange[0] - event.deltaY, yRange[1] - event.deltaY], height>=scaledHeight?0: height-scaledHeight, height>=scaledHeight?height:scaledHeight)"
                 },
                 {
                     "events": "dblclick",
@@ -408,6 +430,55 @@
                 {
                     "events": "pointerup",
                     "update": "null"
+                }
+            ]
+        },
+        {
+            "name": "scrollDown",
+            "value": null,
+            "on": [
+                {
+                    "events": "@scrollThumb:pointerdown",
+                    "update": "y()"
+                },
+                {
+                    "events": "window:pointerup",
+                    "update": "null"
+                }
+            ]
+        },
+        {
+            "name": "yRangeScrollStart",
+            "value": null,
+            "on": [
+                {
+                    "events": "@scrollThumb:pointerdown",
+                    "update": "slice(yRange)"
+                }
+            ]
+        },
+        {
+            "name": "scrollDelta",
+            "value": 0,
+            "on": [
+                {
+                    "events": [
+                        {
+                            "source": "window",
+                            "type": "pointermove",
+                            "consume": true,
+                            "between": [
+                                {
+                                    "type": "@scrollThumb:pointerdown"
+                                },
+                                {
+                                    "source": "window",
+                                    "type": "pointerup"
+                                }
+                            ]
+                        }
+                    ],
+                    "update": "scrollDown ? y() - scrollDown : 0"
                 }
             ]
         },
@@ -2594,6 +2665,91 @@
                     "ticks": true,
                     "bandPosition": {
                         "signal": "0"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "group",
+            "name": "scrollBar",
+            "encode": {
+                "update": {
+                    "x": {
+                        "signal": "width - scrollBarWidth"
+                    },
+                    "y": {
+                        "value": 0
+                    },
+                    "height": {
+                        "signal": "height"
+                    },
+                    "width": {
+                        "signal": "scrollBarWidth"
+                    },
+                    "fill": {
+                        "value": "#f0f0f0"
+                    },
+                    "opacity": {
+                        "signal": "scaledHeight > height ? 1 : 0"
+                    }
+                }
+            },
+            "marks": [
+                {
+                    "type": "rect",
+                    "name": "scrollTrack",
+                    "encode": {
+                        "update": {
+                            "x": {
+                                "value": 0
+                            },
+                            "y": {
+                                "value": 0
+                            },
+                            "width": {
+                                "signal": "scrollBarWidth"
+                            },
+                            "height": {
+                                "signal": "height"
+                            },
+                            "fill": {
+                                "value": "#e0e0e0"
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "name": "scrollThumb",
+                    "encode": {
+                        "update": {
+                            "x": {
+                                "value": 1
+                            },
+                            "y": {
+                                "signal": "(-yRange[0] / (scaledHeight - height)) * scrollTotalTrack"
+                            },
+                            "width": {
+                                "signal": "scrollBarWidth - 2"
+                            },
+                            "height": {
+                                "signal": "scrollThumbHeight"
+                            },
+                            "fill": {
+                                "value": "#888"
+                            },
+                            "cornerRadius": {
+                                "value": 4
+                            },
+                            "cursor": {
+                                "value": "pointer"
+                            }
+                        },
+                        "hover": {
+                            "fill": {
+                                "value": "#666"
+                            }
+                        }
                     }
                 }
             ]
