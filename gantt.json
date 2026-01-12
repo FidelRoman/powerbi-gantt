@@ -608,7 +608,7 @@
                 {
                     "type": "window",
                     "sort": {
-                        "field": "start",
+                        "field": "task",
                         "order": "ascending"
                     },
                     "ops": [
@@ -690,7 +690,7 @@
                 {
                     "type": "window",
                     "sort": {
-                        "field": "start",
+                        "field": "task",
                         "order": "ascending"
                     },
                     "ops": [
