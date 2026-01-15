@@ -204,16 +204,44 @@
             "value": 14
         },
         {
+            "name": "scrollBarHeight",
+            "value": 14
+        },
+        {
+            "name": "showXScroll",
+            "update": "span(allExt) > span(xDom)"
+        },
+        {
+            "name": "scrollThumbWidth",
+            "update": "max(20, (span(xDom) / span(allExt)) * ganttWidth)"
+        },
+        {
+            "name": "scrollTotalTrackX",
+            "update": "ganttWidth - scrollThumbWidth"
+        },
+        {
+            "name": "scrollRatioX",
+            "update": "(span(allExt) - span(xDom)) / scrollTotalTrackX"
+        },
+        {
+            "name": "scrollX",
+            "update": "(xDom[0] - allExt[0]) / scrollRatioX"
+        },
+        {
+            "name": "effectiveHeight",
+            "update": "showXScroll ? height - scrollBarHeight : height"
+        },
+        {
             "name": "scrollThumbHeight",
-            "update": "max(20, (height / scaledHeight) * height)"
+            "update": "max(20, (effectiveHeight / scaledHeight) * effectiveHeight)"
         },
         {
             "name": "scrollTotalTrack",
-            "update": "height - scrollThumbHeight"
+            "update": "effectiveHeight - scrollThumbHeight"
         },
         {
             "name": "scrollRatio",
-            "update": "(scaledHeight - height) / scrollTotalTrack"
+            "update": "(scaledHeight - effectiveHeight) / scrollTotalTrack"
         },
         {
             "name": "dayExt",
@@ -269,7 +297,13 @@
                     "events": {
                         "signal": "delta"
                     },
-                    "update": "[xCur[0] + span(xCur) * delta[0] / width, xCur[1] + span(xCur) * delta[0] / width]"
+                    "update": "clampRange([xCur[0] + span(xCur) * delta[0] / width, xCur[1] + span(xCur) * delta[0] / width], allExt[0], allExt[1])"
+                },
+                {
+                    "events": {
+                        "signal": "scrollXDelta"
+                    },
+                    "update": "clampRange([xDomScrollStart[0] + scrollXDelta * scrollRatioX, xDomScrollStart[0] + scrollXDelta * scrollRatioX + span(xDomScrollStart)], allExt[0], allExt[1])"
                 },
                 {
                     "events": "dblclick",
@@ -313,7 +347,7 @@
                             "signal": "delta"
                         }
                     ],
-                    "update": "clampRange( [yCur[0] + span(yCur) * delta[1] / scaledHeight, yCur[1] + span(yCur) * delta[1] / scaledHeight],height>=scaledHeight?0: height-scaledHeight,height>=scaledHeight?height:scaledHeight)"
+                    "update": "clampRange( [yCur[0] + span(yCur) * delta[1] / scaledHeight, yCur[1] + span(yCur) * delta[1] / scaledHeight],effectiveHeight>=scaledHeight?0: effectiveHeight-scaledHeight,effectiveHeight>=scaledHeight?effectiveHeight:scaledHeight)"
                 },
                 {
                     "events": [
@@ -321,12 +355,12 @@
                             "signal": "scrollDelta"
                         }
                     ],
-                    "update": "clampRange( [yRangeScrollStart[0] - scrollDelta * scrollRatio, yRangeScrollStart[1] - scrollDelta * scrollRatio], height>=scaledHeight?0: height-scaledHeight, height>=scaledHeight?height:scaledHeight)"
+                    "update": "clampRange( [yRangeScrollStart[0] - scrollDelta * scrollRatio, yRangeScrollStart[1] - scrollDelta * scrollRatio], effectiveHeight>=scaledHeight?0: effectiveHeight-scaledHeight, effectiveHeight>=scaledHeight?effectiveHeight:scaledHeight)"
                 },
                 {
                     "events": "wheel",
                     "force": true,
-                    "update": "clampRange( [yRange[0] - event.deltaY, yRange[1] - event.deltaY], height>=scaledHeight?0: height-scaledHeight, height>=scaledHeight?height:scaledHeight)"
+                    "update": "clampRange( [yRange[0] - event.deltaY, yRange[1] - event.deltaY], effectiveHeight>=scaledHeight?0: effectiveHeight-scaledHeight, effectiveHeight>=scaledHeight?effectiveHeight:scaledHeight)"
                 },
                 {
                     "events": "dblclick",
@@ -479,6 +513,55 @@
                         }
                     ],
                     "update": "scrollDown ? y() - scrollDown : 0"
+                }
+            ]
+        },
+        {
+            "name": "scrollXDown",
+            "value": null,
+            "on": [
+                {
+                    "events": "@scrollThumbX:pointerdown",
+                    "update": "x()"
+                },
+                {
+                    "events": "window:pointerup",
+                    "update": "null"
+                }
+            ]
+        },
+        {
+            "name": "xDomScrollStart",
+            "value": null,
+            "on": [
+                {
+                    "events": "@scrollThumbX:pointerdown",
+                    "update": "slice(xDom)"
+                }
+            ]
+        },
+        {
+            "name": "scrollXDelta",
+            "value": 0,
+            "on": [
+                {
+                    "events": [
+                        {
+                            "source": "window",
+                            "type": "pointermove",
+                            "consume": true,
+                            "between": [
+                                {
+                                    "type": "@scrollThumbX:pointerdown"
+                                },
+                                {
+                                    "source": "window",
+                                    "type": "pointerup"
+                                }
+                            ]
+                        }
+                    ],
+                    "update": "scrollXDown ? x() - scrollXDown : 0"
                 }
             ]
         },
@@ -2017,7 +2100,7 @@
                         "signal": "true"
                     },
                     "height": {
-                        "signal": "height+15"
+                        "signal": "effectiveHeight"
                     },
                     "width": {
                         "signal": "ganttWidth"
@@ -2105,7 +2188,7 @@
                         "signal": "true"
                     },
                     "height": {
-                        "signal": "height"
+                        "signal": "effectiveHeight"
                     },
                     "width": {
                         "signal": "ganttWidth"
@@ -2641,7 +2724,7 @@
                         "value": "transparent"
                     },
                     "height": {
-                        "signal": "height"
+                        "signal": "effectiveHeight"
                     }
                 }
             },
@@ -2671,6 +2754,91 @@
         },
         {
             "type": "group",
+            "name": "scrollBarX",
+            "encode": {
+                "update": {
+                    "x": {
+                        "signal": "columnsWidth"
+                    },
+                    "y": {
+                        "signal": "height - scrollBarHeight"
+                    },
+                    "height": {
+                        "signal": "scrollBarHeight"
+                    },
+                    "width": {
+                        "signal": "ganttWidth"
+                    },
+                    "fill": {
+                        "value": "#f0f0f0"
+                    },
+                    "opacity": {
+                        "signal": "showXScroll ? 1 : 0"
+                    }
+                }
+            },
+            "marks": [
+                {
+                    "type": "rect",
+                    "name": "scrollTrackX",
+                    "encode": {
+                        "update": {
+                            "x": {
+                                "value": 0
+                            },
+                            "y": {
+                                "value": 0
+                            },
+                            "width": {
+                                "signal": "ganttWidth"
+                            },
+                            "height": {
+                                "signal": "scrollBarHeight"
+                            },
+                            "fill": {
+                                "value": "#e0e0e0"
+                            }
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "name": "scrollThumbX",
+                    "encode": {
+                        "update": {
+                            "x": {
+                                "signal": "scrollX"
+                            },
+                            "y": {
+                                "value": 1
+                            },
+                            "width": {
+                                "signal": "scrollThumbWidth"
+                            },
+                            "height": {
+                                "signal": "scrollBarHeight - 2"
+                            },
+                            "fill": {
+                                "value": "#888"
+                            },
+                            "cornerRadius": {
+                                "value": 4
+                            },
+                            "cursor": {
+                                "value": "pointer"
+                            }
+                        },
+                        "hover": {
+                            "fill": {
+                                "value": "#666"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "type": "group",
             "name": "scrollBar",
             "encode": {
                 "update": {
@@ -2681,7 +2849,7 @@
                         "value": 0
                     },
                     "height": {
-                        "signal": "height"
+                        "signal": "effectiveHeight"
                     },
                     "width": {
                         "signal": "scrollBarWidth"
@@ -2710,7 +2878,7 @@
                                 "signal": "scrollBarWidth"
                             },
                             "height": {
-                                "signal": "height"
+                                "signal": "effectiveHeight"
                             },
                             "fill": {
                                 "value": "#e0e0e0"
@@ -2727,7 +2895,7 @@
                                 "value": 1
                             },
                             "y": {
-                                "signal": "(-yRange[0] / (scaledHeight - height)) * scrollTotalTrack"
+                                "signal": "(-yRange[0] / (scaledHeight - effectiveHeight)) * scrollTotalTrack"
                             },
                             "width": {
                                 "signal": "scrollBarWidth - 2"
