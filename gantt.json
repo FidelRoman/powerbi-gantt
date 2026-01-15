@@ -221,7 +221,7 @@
         },
         {
             "name": "scrollRatioX",
-            "update": "(span(allExt) - span(xDom)) / scrollTotalTrackX"
+            "update": "span(allExt) / scrollTotalTrackX"
         },
         {
             "name": "scrollX",
@@ -407,7 +407,7 @@
             ],
             "on": [
                 {
-                    "events": "pointerdown",
+                    "events": "pointerdown[!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')]",
                     "update": "slice(xDom)"
                 }
             ]
@@ -420,7 +420,7 @@
             ],
             "on": [
                 {
-                    "events": "pointerdown",
+                    "events": "pointerdown[!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')]",
                     "update": "slice(yRange)"
                 }
             ]
@@ -440,7 +440,10 @@
                             "consume": true,
                             "between": [
                                 {
-                                    "type": "pointerdown"
+                                    "type": "pointerdown",
+                                    "filter": [
+                                        "!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')"
+                                    ]
                                 },
                                 {
                                     "source": "window",
@@ -458,7 +461,7 @@
             "value": null,
             "on": [
                 {
-                    "events": "pointerdown",
+                    "events": "pointerdown[!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')]",
                     "update": "xy()"
                 },
                 {
