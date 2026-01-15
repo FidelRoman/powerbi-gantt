@@ -36,7 +36,7 @@
         },
         {
             "name": "startGrain",
-            "value": "Days",
+            "value": "Months",
             "description": "Days, Months, Years or All"
         },
         {
@@ -312,6 +312,10 @@
                 {
                     "events": "@buttonMarks:click",
                     "update": "datum.name=='All'?allExt:datum.name=='Years'?yearExt:datum.name=='Months'?monthExt:datum.name=='Days'?dayExt:xDom"
+                },
+                {
+                    "events": "@scrollTrackX:pointerdown",
+                    "update": "clampRange([allExt[0] + ((x() - columnsWidth - scrollThumbWidth/2) * scrollRatioX), allExt[0] + ((x() - columnsWidth - scrollThumbWidth/2) * scrollRatioX) + span(xDom)], allExt[0], allExt[1])"
                 },
                 {
                     "events": {
