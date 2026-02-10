@@ -36,7 +36,7 @@
         },
         {
             "name": "startGrain",
-            "value": "Months",
+            "value": "Days",
             "description": "Days, Months, Years or All"
         },
         {
@@ -221,7 +221,7 @@
         },
         {
             "name": "scrollRatioX",
-            "update": "span(allExt) / scrollTotalTrackX"
+            "update": "(span(allExt) - span(xDom)) / scrollTotalTrackX"
         },
         {
             "name": "scrollX",
@@ -297,7 +297,7 @@
                     "events": {
                         "signal": "delta"
                     },
-                    "update": "clampRange([xCur[0] + span(xCur) * delta[0] / width, xCur[1] + span(xCur) * delta[0] / width], allExt[0], allExt[1])"
+                    "update": "[xCur[0] + span(xCur) * delta[0] / width, xCur[1] + span(xCur) * delta[0] / width]"
                 },
                 {
                     "events": {
@@ -312,10 +312,6 @@
                 {
                     "events": "@buttonMarks:click",
                     "update": "datum.name=='All'?allExt:datum.name=='Years'?yearExt:datum.name=='Months'?monthExt:datum.name=='Days'?dayExt:xDom"
-                },
-                {
-                    "events": "@scrollTrackX:pointerdown",
-                    "update": "clampRange([allExt[0] + ((x() - columnsWidth - scrollThumbWidth/2) * scrollRatioX), allExt[0] + ((x() - columnsWidth - scrollThumbWidth/2) * scrollRatioX) + span(xDom)], allExt[0], allExt[1])"
                 },
                 {
                     "events": {
@@ -411,7 +407,7 @@
             ],
             "on": [
                 {
-                    "events": "pointerdown[!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')]",
+                    "events": "pointerdown",
                     "update": "slice(xDom)"
                 }
             ]
@@ -424,7 +420,7 @@
             ],
             "on": [
                 {
-                    "events": "pointerdown[!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')]",
+                    "events": "pointerdown",
                     "update": "slice(yRange)"
                 }
             ]
@@ -444,10 +440,7 @@
                             "consume": true,
                             "between": [
                                 {
-                                    "type": "pointerdown",
-                                    "filter": [
-                                        "!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')"
-                                    ]
+                                    "type": "pointerdown"
                                 },
                                 {
                                     "source": "window",
@@ -465,7 +458,7 @@
             "value": null,
             "on": [
                 {
-                    "events": "pointerdown[!event.item || (event.item.mark.name!='scrollThumb' && event.item.mark.name!='scrollThumbX')]",
+                    "events": "pointerdown",
                     "update": "xy()"
                 },
                 {
