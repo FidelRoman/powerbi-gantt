@@ -120,16 +120,8 @@
             "init": "155+columnPadding"
         },
         {
-            "name": "startColumnWidth",
-            "init": "45+columnPadding"
-        },
-        {
-            "name": "endColumnWidth",
-            "init": "45+columnPadding"
-        },
-        {
-            "name": "daysColumnWidth",
-            "init": "35+columnPadding"
+            "name": "responsableColumnWidth",
+            "init": "100+columnPadding"
         },
         {
             "name": "statusColumnWidth",
@@ -193,7 +185,7 @@
         },
         {
             "name": "columnsWidth",
-            "update": "!showColumns?taskColumnWidth: taskColumnWidth+startColumnWidth+endColumnWidth+daysColumnWidth+statusColumnWidth+progressColumnWidth"
+            "update": "!showColumns?taskColumnWidth: taskColumnWidth+responsableColumnWidth+statusColumnWidth+progressColumnWidth"
         },
         {
             "name": "ganttWidth",
@@ -1688,13 +1680,13 @@
                 },
                 {
                     "type": "group",
-                    "name": "startColumnWidth",
+                    "name": "responsableColumnWidth",
                     "clip": {
                         "signal": "!showColumns"
                     },
                     "title": {
                         "text": {
-                            "signal": "'Start'"
+                            "signal": "'Responsable'"
                         },
                         "anchor": "middle",
                         "dx": {
@@ -1706,13 +1698,13 @@
                     "encode": {
                         "update": {
                             "width": {
-                                "signal": "startColumnWidth"
+                                "signal": "responsableColumnWidth"
                             },
                             "height": {
                                 "signal": "height"
                             },
                             "stroke": {
-                                "value": ""
+                                "value": "transparent"
                             }
                         }
                     },
@@ -1730,13 +1722,13 @@
                                         "value": "center"
                                     },
                                     "x": {
-                                        "signal": "(startColumnWidth-columnPadding)/2"
+                                        "signal": "(responsableColumnWidth-columnPadding)/2"
                                     },
                                     "y": {
                                         "signal": "scale('y', datum.id)+bandwidth('y')/2"
                                     },
                                     "text": {
-                                        "signal": "timeFormat(datum.start,' %d/%m/%y')"
+                                        "signal": "datum.Responsable"
                                     },
                                     "font": {
                                         "signal": "datum.phase == datum.task?'Arial':'Segoe UI'"
@@ -1744,137 +1736,8 @@
                                     "fontWeight": {
                                         "signal": "datum.phase == datum.task?'bold':'normal'"
                                     },
-                                    "fill": {
-                                        "signal": "datum.id == itemHovered.id  ?merge(hsl(scale('cDark', datum.phase)), {l:0.40}):textColour"
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "type": "group",
-                    "name": "endColumnWidth",
-                    "clip": {
-                        "signal": "!showColumns"
-                    },
-                    "title": {
-                        "text": {
-                            "signal": "'End'"
-                        },
-                        "anchor": "middle",
-                        "dx": {
-                            "signal": "-(columnPadding/2)"
-                        },
-                        "frame": "group",
-                        "align": "center"
-                    },
-                    "encode": {
-                        "update": {
-                            "width": {
-                                "signal": "endColumnWidth"
-                            },
-                            "stroke": {
-                                "value": "transparent"
-                            },
-                            "height": {
-                                "signal": "height"
-                            }
-                        }
-                    },
-                    "marks": [
-                        {
-                            "type": "text",
-                            "style": "col",
-                            "clip": true,
-                            "from": {
-                                "data": "yScale"
-                            },
-                            "encode": {
-                                "update": {
-                                    "align": {
-                                        "value": "center"
-                                    },
-                                    "x": {
-                                        "signal": "(startColumnWidth-columnPadding)/2"
-                                    },
-                                    "y": {
-                                        "signal": "scale('y', datum.id)+bandwidth('y')/2"
-                                    },
-                                    "text": {
-                                        "signal": "timeFormat(datum.labelEnd,' %d/%m/%y')"
-                                    },
-                                    "font": {
-                                        "signal": "datum.phase == datum.task?'Arial':'Segoe UI'"
-                                    },
-                                    "fontWeight": {
-                                        "signal": "datum.phase == datum.task?'bold':'normal'"
-                                    },
-                                    "fill": {
-                                        "signal": "datum.id == itemHovered.id  ?merge(hsl(scale('cDark', datum.phase)), {l:0.40}):textColour"
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                },
-                {
-                    "type": "group",
-                    "name": "daysColumnWidth",
-                    "clip": {
-                        "signal": "!showColumns"
-                    },
-                    "title": {
-                        "text": {
-                            "signal": "'Days'"
-                        },
-                        "anchor": "end",
-                        "dx": {
-                            "signal": "-columnPadding"
-                        },
-                        "frame": "group",
-                        "align": "right"
-                    },
-                    "encode": {
-                        "update": {
-                            "width": {
-                                "signal": "daysColumnWidth"
-                            },
-                            "stroke": {
-                                "value": "transparent"
-                            },
-                            "height": {
-                                "signal": "height"
-                            }
-                        }
-                    },
-                    "marks": [
-                        {
-                            "type": "text",
-                            "style": "col",
-                            "clip": true,
-                            "from": {
-                                "data": "yScale"
-                            },
-                            "encode": {
-                                "update": {
-                                    "align": {
-                                        "value": "right"
-                                    },
-                                    "x": {
-                                        "signal": "daysColumnWidth-columnPadding"
-                                    },
-                                    "y": {
-                                        "signal": "scale('y', datum.id)+bandwidth('y')/2"
-                                    },
-                                    "text": {
-                                        "signal": "format(datum.days,',')+' d'"
-                                    },
-                                    "fontWeight": {
-                                        "signal": "datum.phase == datum.task?'bold':'normal'"
-                                    },
-                                    "font": {
-                                        "signal": "datum.phase == datum.task?'Arial':'Segoe UI'"
+                                    "limit": {
+                                        "signal": "responsableColumnWidth-columnPadding"
                                     },
                                     "fill": {
                                         "signal": "datum.id == itemHovered.id  ?merge(hsl(scale('cDark', datum.phase)), {l:0.40}):textColour"
